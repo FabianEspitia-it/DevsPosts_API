@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from db.models import Users
+from db.models import Users, Country
 
 
 class UserRegisterSerializer(serializers.Serializer):
@@ -17,12 +17,14 @@ class UserRegisterSerializer(serializers.Serializer):
         return data 
 
     def create(self, validated_data):
+        country_user = Country.objects.filter(country=validated_data["country"]).first()
         validated_data.pop("confirmpassword")
         user = Users.objects.create(
             username=validated_data["username"], 
             email=validated_data["email"],
+            country=(country_user),
             phone= validated_data["phone"]
-        ),
+        )
         user.set_password(validated_data["userpassword"])
         user.save()
         return user
@@ -43,8 +45,22 @@ class UsersLoginSerializer(serializers.Serializer):
 
 
 class UserViewSerializer(serializers.ModelSerializer):
+
+    
+
     class Meta:
         model = Users
         exclude = ['userpassword']
+
+    def to_representation(self, instance):
+        country_name = Country.objects.filter(id = instance.country.id).first()
+        return {
+            "username" : instance.username, 
+            "email" : instance.email,
+            "country" : country_name.country
+        }
+    
+
+
 
 
