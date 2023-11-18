@@ -18,6 +18,8 @@ class UserRegisterSerializer(serializers.Serializer):
 
     def create(self, validated_data):
         country_user = Country.objects.filter(country=validated_data["country"]).first()
+        if not country_user:
+            country_user = Country.objects.create(country=validated_data["country"])
         validated_data.pop("confirmpassword")
         user = Users.objects.create(
             username=validated_data["username"], 
@@ -54,6 +56,7 @@ class UserViewSerializer(serializers.ModelSerializer):
 
     def to_representation(self, instance):
         country_name = Country.objects.filter(id = instance.country.id).first()
+
         return {
             "username" : instance.username, 
             "email" : instance.email,
