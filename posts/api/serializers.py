@@ -17,13 +17,15 @@ class AllPostSerializer(serializers.ModelSerializer):
     def to_representation(self, instance):
 
         tech = Technology.objects.filter(id=instance.technology_id).first()
+        user = Users.objects.filter(id= instance.user.id).first()
+
         return {
             "title": instance.title,
             "content": instance.content,
             "likes": instance.likes,
             "technology": tech.title,
             "created_at": instance.created_at,
-            "user": instance.user
+            "user": user.username
         }
 
 
@@ -31,6 +33,7 @@ class CreatePostSerializer(serializers.Serializer):
     title = serializers.CharField(max_length=255)
     content = serializers.CharField()
     technology = serializers.CharField(max_length=100)
+    user = serializers.CharField(max_length= 100)
 
     def create(self, validated_data):
 
@@ -47,7 +50,8 @@ class CreatePostSerializer(serializers.Serializer):
             content=validated_data["content"],
             created_at=datetime.datetime.now(),
             technology_id=tech_info.id,
-            likes=0
+            likes=0, 
+            user = Users.objects.filter(username=validated_data["user"]).first()
 
         )
 

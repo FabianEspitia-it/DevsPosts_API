@@ -41,14 +41,14 @@ class UsersLoginAPIView(APIView):
         serializer = UsersLoginSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
+        user = Users.objects.filter(email=request.data["email"]).first()
         payload_content = {
-            "email": request.data["email"],
+            "username": user.username,
             "exp": datetime.datetime.now() + datetime.timedelta(days=1),
             "iat": datetime.datetime.now()
         }
         token = jwt.encode(payload_content, SECRET_KEY, algorithm="HS256")
 
-        user = Users.objects.filter(email= request.data["email"]).first()
         """
         response = Response()
         response.set_cookie(key=TOKEN_NAME, value=token, httponly=True)
